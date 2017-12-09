@@ -1,0 +1,39 @@
+#
+# install brew
+#
+- name: update brew
+  register: result
+  ignore_errors: True
+  command: >
+    brew update
+
+- name: get brew installer
+  get_url: url=https://raw.githubusercontent.com/Homebrew/install/master/install dest=/tmp/brew_install
+  when: result|failed
+
+- name: proceed brew installer
+  command: >
+    ruby /tmp/brew_install
+  when: result|failed
+
+#
+# install apps
+#
+- name: tap external homebrew repositories
+  homebrew_tap: tap={{ item }} state=present
+  with_items: homebrew_repositories
+  when: homebrew_repositories
+  become: False
+
+- name: update homebrew
+  homebrew: update_homebrew=yes
+  become: False
+
+- name: install and upgrade homebrew packages
+  homebrew:
+    name={{ item.name | default(item) }}
+    state={{ item.state | default('latest') }}
+    install_options={{ item.install_option | default('') }}
+  with_items: "{{ homebrew_packages }}"
+  when: homebrew_packages
+  become: False

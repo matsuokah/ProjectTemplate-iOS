@@ -1,0 +1,102 @@
+# coding: utf-8
+
+=begin
+# Lane for build application
+=end
+
+class AppContext
+    @@project = '{{ PROJECT_NAME }}'
+    @@env_hash = {
+        'debug' => 'debug',
+        'release' => 'release'
+    }
+
+    @@platform_hash = {
+        'i' => 'i',
+        'tv' => 'tv',
+        'mac' => 'mac',
+    }
+
+    @@platform_name_hash = {
+        'i' => 'iOS',
+        'tv' => 'tvOS',
+        'mac' => 'macOS'
+    }
+
+    def self.validate_env(env)
+        unless @@env_hash.has_key?(env)
+            raise [
+                "Invalid environment: #{env}\n",
+                "Valid environment is one of them: #{env_hash}",
+            ].join("\n")
+        end
+    end
+
+    def self.validate_platform(platform)
+        unless @@platform_hash.has_key?(platform)
+            raise [
+                "Invalid platform: #{platform}\n",
+                "Valid platform is one of them: #{platform_hash}",
+            ].join("\n")
+        end
+    end
+
+    def initialize(env, platform)
+        @env = env
+        @platform = platform
+    end
+
+    def xcworkspace
+        @@project + ".xcworkspace"
+    end
+
+    def scheme
+        #Sample: "#{@@project}-#{@@platform_name_hash.fetch(@platform, 'iOS')}"
+        "#{@@project}"
+    end
+
+    def env_fullname
+        @@env_hash[@env]
+    end
+
+    def configuration
+        env_fullname.capitalize
+    end
+
+    def build_directory
+        "Build"
+    end
+
+    def ipa_name
+        [@@project, @env, @platform].join('-') + ".ipa"
+    end
+
+    def ipa_path
+        File.join(
+            build_directory,
+            ipa_name
+        )
+    end
+
+    def dsym_name
+        [@@project, @env, @platform].join('-') + ".app.dSYM.zip"
+    end
+
+    def dsym_path
+        File.join(
+            build_directory,
+            dsym_name
+        )
+    end
+
+    def export_method
+        case @env
+        when 'release'
+            "app-store"
+        else
+            "development"
+        end
+    end
+end
+
+# vim: ft=ruby sw=4 ts=4 sts=4

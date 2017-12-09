@@ -1,0 +1,17 @@
+ - name: Setup destination directory
+   set_fact:
+     dest_dir: "{{ ansible_env.PWD }}/../fastlane"
+
+ - name: Create directory fastlane
+   file: path={{ dest_dir }} state=directory mode=0755
+
+ - name: Deploy Fastfile
+   template:
+     src=fastlane/{{ item }}.j2
+     dest={{ dest_dir }}/{{ item }}
+     force=False
+   with_items:
+     - AppContext 
+     - Fastfile
+     - Env
+

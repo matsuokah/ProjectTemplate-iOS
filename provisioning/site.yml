@@ -1,0 +1,9 @@
+---
+- name: iOS Provisioning
+  hosts: local
+  become: no
+  roles:
+    # App Installations
+    - templates
+    - brew
+    - gem

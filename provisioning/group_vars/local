@@ -1,0 +1,11 @@
+homebrew_repositories: []
+
+homebrew_packages:
+  - swimat
+
+gem_packages:
+  - bundler
+
+
+    
+# vim:ft=ansible:

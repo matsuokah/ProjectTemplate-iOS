@@ -1,0 +1,5 @@
+ - include: cocoapods.yml
+ - include: gem.yml
+ - include: git.yml
+ - include: fastlane.yml
+

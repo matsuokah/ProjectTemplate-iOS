@@ -1,0 +1,6 @@
+ - name: Deploy gemfile
+   template:
+     src=gem/Gemfile.j2
+     dest={{ansible_env.PWD}}/../Gemfile
+     force=False
+ 

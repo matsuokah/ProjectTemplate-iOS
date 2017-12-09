@@ -1,0 +1,6 @@
+ - name: Deploy Podfile
+   template:
+     src=cocoapods/Podfile.j2
+     dest={{ansible_env.PWD}}/../Podfile
+     force=False
+

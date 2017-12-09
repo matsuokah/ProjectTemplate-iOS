@@ -1,0 +1,6 @@
+ - name: Deploy gitignore
+   template:
+     src=git/gitignore.j2
+     dest={{ansible_env.PWD}}/../.gitignore
+     force=False
+ 
