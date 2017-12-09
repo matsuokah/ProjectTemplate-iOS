@@ -1,0 +1,31 @@
+# coding: utf-8
+
+module Fabric
+    def self.api_token
+        "API_TOKEN"
+    end
+
+    def self.build_secret
+        "BUILD_SECRET"
+    end
+
+    def self.tester_group
+        ['self']
+    end
+end
+
+module Slack
+    def self.url
+        'INCOMING_WEBHOOK_URL'
+    end
+
+    def self.channel
+        '#CHANNEL'
+    end
+
+    def self.username
+        'fastlane-ios'
+    end
+end
+
+# vim: ft=ruby sw=4 ts=4 sts=4

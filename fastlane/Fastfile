@@ -1,0 +1,107 @@
+# coding: utf-8
+
+fastlane_version "2.68.0"
+
+default_platform :ios
+
+load './Env'
+import "./AppContext"
+
+def note()
+    [
+        # branch name
+        sh("git name-rev --name-only HEAD"),
+        # current hash
+        sh("git rev-parse --verify HEAD")
+    ].join("\n")
+end
+
+platform :ios do
+    before_all do
+        # Please Set in Env
+        ENV['SLACK_URL'] = Slack.url
+        ENV['FL_SLACK_CHANNEL'] = Slack.channel
+        ENV['FL_SLACK_USERNAME'] = Slack.username
+        ENV['CRASHLYTICS_API_TOKEN'] = Fabric.api_token
+        ENV['CRASHLYTICS_BUILD_SECRET'] = Fabric.build_secret
+    end
+
+    after_all do |lane|
+        slack(
+            message: "Application was Build"
+        )
+    end
+
+    error do |lane, exception|
+        slack(
+            success: false,
+            message: exception.message
+        )
+    end
+
+    #=Lanes
+    desc "Runs all the tests"
+    lane :test do
+        scan
+    end
+
+    lane :release do |options|
+        options[:env] = 'release'
+        archive(options)
+    end
+
+    lane :debug do |options|
+        options[:env] = 'debug'
+        beta(options)
+    end
+
+    private_lane :beta do |options|
+        archive(options)
+        crashlytics(groups: Fabric.tester_group, notes: note())
+    end
+
+    private_lane :archive do |options|
+        #
+        # validate
+        #
+        env = options.fetch(:env, 'debug')
+        platform = options.fetch(:platform, 'i')
+
+        UI.message "Selected Env: #{env}"
+        UI.message "Platform: #{platform}"
+
+        begin
+            AppContext.validate_env(env)
+            AppContext.validate_platform(platform)
+        rescue => e
+            UI.user_error!(e.message)
+            Kernel.abort
+        end
+
+        # Create build context for the environmentc
+        context = AppContext.new(env, platform)
+
+        #
+        # archive
+        #
+        build_app(
+            :workspace            => context.xcworkspace,
+            :scheme               => context.scheme,
+            :export_method        => context.export_method,
+            :configuration        => context.configuration,
+            :build_path           => context.build_directory,
+            :buildlog_path        => context.build_directory,
+            :derived_data_path    => context.build_directory,
+            :output_directory     => context.build_directory,
+            :output_name          => context.ipa_name,
+            :clean                => true
+        ) # Build your app - more options available
+
+        copy_artifacts(
+            target_path: "artifacts",
+            artifacts: [context.ipa_path, context.dsym_path]
+        )
+    end
+end
+
+# vim: ft=ruby sw=4 ts=4 sts=4
